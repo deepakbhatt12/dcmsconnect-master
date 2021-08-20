@@ -1,0 +1,175 @@
+﻿@model DcmsMobile.PickWaves.Areas.PickWaves.Home.IndexViewModel
+@{
+    ViewBag.Title = "Pick Waves Home";
+    Layout = @MVC_PickWaves.PickWaves.SharedViews.Views._layoutPickWaves;
+}
+
+
+<div class="container">
+    <h2 style="margin-top:0">
+        Pick Wave Home
+    </h2>
+
+    <div class="row">
+        <div class="col-lg-3 col-md-4 col-sm-5">
+            <div class="list-group">
+                <a href="@Url.Action(MVC_PickWaves.PickWaves.Home.Customers())" class="list-group-item list-group-item-success">
+                    <span>
+                        <span class="glyphicon glyphicon-adjust"></span>
+                        Manage Pick Waves
+                        <span class="glyphicon glyphicon-chevron-right pull-right"></span>
+                    </span>
+                </a>
+                <div class="list-group-item">
+                    <strong>
+                        Recently Modified
+                    </strong>
+                    </div>
+
+                    @for (var i = 0; i < Model.RecentBuckets.Count; ++i)
+                    {
+                        <div class="list-group-item">
+                            <a href="@Url.Action(MVC_PickWaves.PickWaves.ManageWaves.WavePickslips(Model.RecentBuckets[i].BucketId))">
+                                @Html.DisplayFor(m => m.RecentBuckets[i].BucketId)
+                            </a>
+                            <small>
+                                <span>@Html.DisplayFor(m => m.RecentBuckets[i].ModifyDate)</span>
+                                by @Html.DisplayFor(m => m.RecentBuckets[i].CreatedBy)
+                            </small>
+                            <p class="list-group-item-text">@Html.DisplayFor(m => m.RecentBuckets[i].BucketName)</p>
+                        </div>
+                    }
+
+                
+            </div>
+        </div>
+
+        <div class="col-lg-5 col-md-8 col-sm-7">
+            <div class="list-group">
+                <span class="list-group-item list-group-item-success">
+                    <span>
+                        <span class="glyphicon glyphicon-folder-close"></span>
+                        Create Pick Waves
+                    </span>
+                </span>
+                <div class="list-group-item">
+                    <strong>You can create Pickwave for these customer</strong>
+                  
+                        @for (var i = 0; i < Model.ImportedOrders.Count; ++i)
+                        {
+
+                        <div title="@string.Format("Create Pick Waves for {0}", Model.ImportedOrders[i].CustomerName)"
+                            @Html.Raw(Model.ImportedOrders[i].IsCustomerActive ? "" : "style=text-decoration:line-through")>
+
+
+                            <a href="@Url.Action(MVC_PickWaves.PickWaves.CreateWave.Index(Model.ImportedOrders[i].CustomerId))">
+                                @Html.DisplayFor(m => m.ImportedOrders[i].CustomerId):
+
+                                <small>
+                                    @Html.DisplayFor(m => m.ImportedOrders[i].CustomerName)
+                                </small>
+                            </a>
+                            <small>
+                                <span>@Html.DisplayFor(m => m.ImportedOrders[i].PickslipCount) pickslips</span>
+                                <em>
+                                    Imported @Html.DisplayFor(m => m.ImportedOrders[i].ImportDateRange)
+                                </em>
+                            </small>
+                        </div>
+                        }
+
+                  
+                </div>
+
+            </div>
+        </div>
+        <div class="col-lg-4 col-md-6 col-sm-6">
+            <div class="list-group">
+                <div class="list-group-item list-group-item-success">
+                    <span class="glyphicon glyphicon-shopping-cart "></span>
+                    Create Pitch Carts
+                    <span class="glyphicon glyphicon-chevron-right pull-right"></span>
+                </div>
+                <div class="list-group-item">
+                    <strong>
+                        TODO: List of pick waves for which MPC can be created
+                    </strong>
+                    <ul class="list-inline">
+                        <li style="width:18em">
+                            asdsadasa
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 col-sm-6">
+            <div class="list-group">
+                <a href="@Url.Action(MVC_PickWaves.PickWaves.BoxPickPallet.Index())" class="list-group-item list-group-item-success">
+                    <span class="glyphicon glyphicon-briefcase"></span>
+                    Box Expediting
+                    <span class="glyphicon glyphicon-chevron-right pull-right"></span>
+
+                </a>
+                <div class="list-group-item">
+                    <div>
+                        Unfrozen pick waves ready for expediting
+                    </div>
+                    <ul class="list-inline">
+                        @for (var i = 0; i < Model.ExpediteBuckets.Count; ++i)
+                        {
+                            <li style="width:18em">
+                                <a href="@Url.Action(MVC_PickWaves.PickWaves.BoxPickPallet.Index())">
+                                    @Html.DisplayFor(m => m.ExpediteBuckets[i].BucketId)
+                                </a>
+                                <small>
+                                    @Html.DisplayFor(m => m.ExpediteBuckets[i].ModifyDate)
+                                    by @Html.DisplayFor(m => m.ExpediteBuckets[i].CreatedBy)
+                                </small>
+
+                            </li>
+                        }
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="panel panel-success">
+        <div class="panel-heading">
+            <a href="@Url.Action(MVC_PickWaves.PickWaves.Config.Index())">
+                <h4 class="panel-title">
+                    <span class="glyphicon glyphicon-cog"></span>
+                    Pick Wave Configuration
+                </h4>
+            </a>
+        </div>
+        <div class="panel-body">
+            <div class="btn-group btn-group-justified" role="group" aria-label="...">
+                <div class="btn-group" role="group">
+
+                    <a href="@Url.Action(MVC_PickWaves.PickWaves.Config.SkuCase())">
+                        Carton Sizes
+                    </a>
+                </div>
+                <div class="btn-group" role="group">
+                    <a href="@Url.Action(MVC_PickWaves.PickWaves.Config.StyleSkuCase())">
+                        Style Cartons Sizes
+                    </a>
+                </div>
+                <div class="btn-group" role="group">
+                    <a href="@Url.Action(MVC_PickWaves.PickWaves.Config.CustSkuCase())">
+                        Customer Carton Sizes
+                    </a>
+                </div>
+                <div class="btn-group" role="group">
+                    <a href="@Url.Action(MVC_PickWaves.PickWaves.Config.Constraint())">
+                        Customer Weight and Volume Restrictions
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

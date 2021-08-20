@@ -1,0 +1,289 @@
+﻿@model DcmsMobile.REQ2.Areas.REQ2.Home.PropertyEditorViewModel
+@{
+    Layout = MVC_REQ2.REQ2.SharedViews.Views._layoutReq2;
+    ViewBag.Title = string.IsNullOrEmpty(Model.ResvId) ? "Create New Request" : string.Format("Edit Request #{0}", Model.ResvId);
+    Html.EnableClientValidation();
+    Html.EnableUnobtrusiveJavaScript();
+}
+
+
+@section applinks {
+    <li>
+        @Html.ActionLink("Recent Requests", MVC_REQ2.REQ2.Home.Index())
+        @Html.ActionLink("Create New Request", MVC_REQ2.REQ2.Home.PropertyEditor())
+    </li>
+}
+
+@section script {
+    <script type="text/javascript" src="@Links_REQ2.Areas.REQ2.Home.PropertyEditor_js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+            var $ddlTargetQuality = $('#ddlTargetQuality');
+            var $CbTargetQuality = $('#CbTargetQuality');
+            // var $CbConversionRequest = $('#CbConversionRequest');
+            // var $ddlTargetVwh = $('#ddlTargetVwh');
+
+            if ($('#resvId').val() != '') {
+
+                // Converion request can not be undone.
+                //$CbConversionRequest.attr('disabled', 'disabled');
+                //if ($CbConversionRequest.attr('checked')) {
+                //    $ddlTargetVwh.removeAttr('disabled');
+                //} else {
+                //    $ddlTargetVwh.attr('disabled', 'disabled');
+                //}
+                if ($ddlTargetQuality.val() != '') {
+                    $CbTargetQuality.attr('checked', 'checked');
+                } else {
+                    $ddlTargetQuality.val('').attr('disabled', 'disabled');
+                }
+
+
+
+            }
+            else {
+                //  $CbConversionRequest.removeAttr('disabled');
+                // $ddlTargetVwh.attr('disabled', 'disabled');
+                $ddlTargetQuality.val('').attr('disabled', 'disabled');
+            }
+
+            //$CbConversionRequest.change(function (e) {
+            //    if ($CbConversionRequest.is(':checked')) {
+            //        $ddlTargetVwh.removeAttr('disabled');
+            //    }
+            //    else {
+            //        $ddlTargetVwh.val('').attr('disabled', 'disabled');
+            //    }
+            //});
+
+            $CbTargetQuality.change(function (e) {
+                if ($CbTargetQuality.is(':checked')) {
+                    $ddlTargetQuality.removeAttr('disabled');
+                }
+                else {
+                    $ddlTargetQuality.val('').attr('disabled', 'disabled');
+                }
+            });
+
+            $('#btnCreateRequest').button({ icons: { primary: 'ui-icon-document' } });
+            $('#btnSaveRequest').button({ icons: { primary: 'ui-icon-disk' } });
+            $('#btnGo').button({ icons: { secondary: 'ui-icon-search' } }).click(function (e) {
+                if ($('#frmSearch input:text').val() == '') {
+                    $('#frmSearch div').html("Please enter the valid Request ID")
+                        .removeClass('validation-summary-valid')
+                        .addClass('validation-summary-errors');
+                    return false;
+                }
+            });
+        });
+    </script>
+}
+
+
+<div class="container">
+    <h2 style="margin-top:0">
+        <span class="@Html.Raw((Model.RequestForConversion) ? "glyphicon glyphicon-retweet" : "null")" aria-hidden="true">  
+        </span>
+        <span class="sr-only">Conversion Request</span>
+
+        @Html.Raw(string.IsNullOrEmpty(Model.ResvId) ? "Create New Request" : string.Format("Edit Request #{0}", Model.ResvId))
+    </h2>
+
+
+    @using (Html.BeginForm(MVC_REQ2.REQ2.Home.UpdateRequest(), FormMethod.Post, new
+{
+    @class = "form-horizontal",
+    role = "form"
+}))
+    {
+
+        @Html.HiddenFor(m => m.ResvId, new { id = "resvId" })
+
+        @Html.HiddenFor(m => m.RequestForConversion, new { id = "RequestForConversion" })
+
+
+
+        <div class="form-group">
+            <div class="btn-group-xs " data-toggle="buttons">
+                <label class="@Html.Raw(Model.PriorityFlag.Equals(DcmsMobile.REQ2.Areas.REQ2.Home.Priority.High) ? "btn btn-primary active" : "btn btn-primary")">
+                    <input type="radio" name="@Html.NameFor(m => m.PriorityFlag)" value="@DcmsMobile.REQ2.Areas.REQ2.Home.Priority.High" id="@DcmsMobile.REQ2.Areas.REQ2.Home.Priority.High" autocomplete="off" @Html.Raw(Model.PriorityFlag.Equals(DcmsMobile.REQ2.Areas.REQ2.Home.Priority.High) ? "checked" : "")> High Prority
+                </label>
+                <label class="@Html.Raw(Model.PriorityFlag.Equals(DcmsMobile.REQ2.Areas.REQ2.Home.Priority.Medium) ? "btn btn-primary active" : "btn btn-primary")">
+                    <input type="radio" name="@Html.NameFor(m => m.PriorityFlag)" value="@DcmsMobile.REQ2.Areas.REQ2.Home.Priority.Medium" id="@DcmsMobile.REQ2.Areas.REQ2.Home.Priority.Medium" autocomplete="off" @Html.Raw(Model.PriorityFlag.Equals(DcmsMobile.REQ2.Areas.REQ2.Home.Priority.Medium) ? "checked" : "")> Medium Prority
+                </label>
+                <label class="@Html.Raw(Model.PriorityFlag.Equals(DcmsMobile.REQ2.Areas.REQ2.Home.Priority.Low) ? "btn btn-primary active" : "btn btn-primary")">
+                    <input type="radio" name="@Html.NameFor(m => m.PriorityFlag)" value="@DcmsMobile.REQ2.Areas.REQ2.Home.Priority.Low" id="@DcmsMobile.REQ2.Areas.REQ2.Home.Priority.Low" autocomplete="off" @Html.Raw(Model.PriorityFlag.Equals(DcmsMobile.REQ2.Areas.REQ2.Home.Priority.Low) ? "checked" : "")> Low Prority
+                </label>
+
+            </div>
+            @*<div>
+                     <div class="form-group">
+                         <label for="tbPriority">Priority</label>
+                         <input type="number" name="@Html.NameFor(m=>m.Priorities)" value="@Model.Priorities" min="1" max="99" />
+                         @Html.ValidationMessageFor(m => m.Priorities, null, new
+                {
+                    @class = "help-block"
+                })
+                         <p class="help-block hidden-xs">Increase it if you need SKU urgently.</p>
+                     </div>
+                 </div>*@
+        </div>
+
+        <div class="form-group">
+            <label for="ddlVwh" class="col-sm-2 control-label">Vwh</label>
+            <div class="col-sm-5">
+                @Html.DropDownListFor(m => m.VirtualWareHouseId, Model.VirtualWareHouseList, Model.VirtualWareHouseList.Count() > 1 ? "(Please Select)" : null, new
+           {
+               id = "ddlVwh",
+               @class = "form-control"
+           })
+
+                <p class="help-block hidden-xs">Source Virtual Warehouse</p>
+            </div>
+            @if(Model.RequestForConversion)
+            {
+            <div class="col-sm-5 conversion-only">
+                <div class="input-group">
+                    <span class="input-group-addon">Convert To</span>
+
+                    @Html.DropDownListFor(m => m.TargetVwhId, Model.TargetVwhList, Model.TargetVwhList.Count() > 1 ? "(Please Select)" : null, new
+           {
+               id = "ddlTargetVwh",
+               @class = "form-control"
+
+
+           })
+                </div>
+                <p class="help-block  hidden-xs">The Virtual Warehouse to which all pulled SKUs should be converted to</p>
+            </div>
+            }
+        </div>
+        <div class="form-group">
+
+            <label for="ddlArea" class="col-sm-2 control-label">Building</label>
+            <div class="col-sm-5">
+
+                @Html.DropDownListFor(m => m.BuildingId, Model.BuildingList, Model.BuildingList.Count() > 1 ? "(Please Select)" : null, new
+           {
+               id = "ddlArea",
+               @class = "form-control"
+           })
+                <p class="help-block  hidden-xs">Source area where cartons will be looked.</p>
+
+            </div>
+
+            <div class="checkbox col-sm-5">
+                <label>
+                    @Html.CheckBoxFor(m => m.OverPullCarton, new { }) Allow Overpulling
+                </label>
+            </div>
+
+        </div>
+
+        <div class="form-group">
+
+            <label for="ddlArea" class="col-sm-2 control-label">Source area</label>
+            <div class="col-sm-5">
+
+                @Html.DropDownListFor(m => m.SourceAreaId, Model.SourceAreas, Model.SourceAreas.Count() > 1 ? "(Please Select)" : null, new
+           {
+               id = "ddlArea",
+               @class = "form-control"
+           })
+                <p class="help-block  hidden-xs">Source area where cartons will be looked.</p>
+
+
+            </div>
+            <div class="col-sm-5 conversion-only">
+                @Html.DropDownListFor(m => m.DestinationAreaId, Model.DestinationAreas, Model.DestinationAreas.Count() > 1 ? "(Please Select)" : null, new
+           {
+               id = "ddlArea",
+               @class = "form-control"
+           })
+                <p class="help-block  hidden-xs">Destination area where cartons will be sent</p>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="inputEmail3" class="col-sm-2 control-label">Pull SKUs of Quality</label>
+            <div class="col-sm-5">
+                <div class="input-group">
+                    @Html.DropDownListFor(m => m.SourceQualityCode, Model.SourceQualityCodeList, "ANY", new { @class = "form-control" })
+                </div>
+            </div>
+            <div class="col-sm-5">
+                <div class="input-group">
+                    <span class="input-group-addon">
+                        @Html.CheckBoxFor(m => m.UpdateQualityFlag, new { id = "CbTargetQuality", })
+                    </span>
+                    @Html.DropDownListFor(m => m.TargetQualityCode, Model.TargetQualityCodeList, "No Change", new { id = "ddlTargetQuality", @class = "form-control" })
+
+                </div><!-- /input-group -->
+                <p class="help-block  hidden-xs">Select a quality above if you would like to change the quality of the cartons before they are pulled.</p>
+            </div>
+        </div>
+
+        <div class="form-group">
+
+            <label for="ddlArea" class="col-sm-2 control-label">Price Season Code</label>
+            <div class="col-sm-5">
+
+                @Html.DropDownListFor(m => m.PriceSeasonCode, Model.PriceSeason, Model.PriceSeason.Count() > 1 ? "(Please Select)" : null, new
+           {
+               id = "ddlArea",
+               @class = "form-control"
+           })
+                <p class="help-block  hidden-xs">Select price season code of the cartons to be pulled for your request.</p>
+
+            </div>
+
+            <div> <b>Sewing Plant Code  </b> </div>
+
+            <div class="col-sm-5">
+
+                @Html.DropDownListFor(m => m.SewingPlantCode, Model.SewingPlant, Model.SewingPlant.Count() > 1 ? "(Please Select)" : null, new
+           {
+               id = "ddlArea",
+               @class = "form-control"
+           })
+                <p class="help-block  hidden-xs">Select price season code of the cartons to be pulled for your request.</p>
+
+            </div>
+
+        </div>
+
+
+        <div class="form-group">
+            <label for="inputEmail3" class="col-sm-2 control-label">Remarks</label>
+            <div class="col-sm-10">
+                @Html.TextAreaFor(m => m.Remarks, new { @class = "form-control" })
+                <p class="help-block  hidden-xs">Remarks entered here will be printed on your carton ticket</p>
+            </div>
+
+        </div>
+
+        <div>
+            @if (string.IsNullOrEmpty(Model.ResvId))
+            {
+                <button type="submit" class="btn btn-default" id="btnCreateRequest">
+                    Create Request
+                </button>
+            }
+            else
+            {
+                <button type="submit" class="btn btn-default" id="btnSaveRequest">
+                    Save Request
+                </button>
+                @Html.ActionLink("Continue without saving", MVC_REQ2.REQ2.Home.PullRequest(@Model.ResvId))
+
+            }
+
+        </div>
+
+
+    }
+
+</div>
+
+@*$Id$*@

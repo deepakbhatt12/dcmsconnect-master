@@ -1,0 +1,227 @@
+﻿@using DcmsMobile.PickWaves.Helpers
+@model DcmsMobile.PickWaves.Areas.PickWaves.ManageWaves.WaveSkuListModel
+@{
+    ViewBag.Title = "Pick Wave # " + Model.Bucket.BucketId;
+    Layout = MVC_PickWaves.PickWaves.SharedViews.Views._layoutPickWaves;
+}
+
+@section applinks{
+    <li title="This report display details of pick wave.">
+        <a href="@(string.Format("{0}?bucket_id={1}", DcmsMobile.PickWaves.Areas.PickWaves.ManageWaves.ManageWavesController.BucketSummaryReportUrl, Model.Bucket.BucketId))" target="report">
+            Report 140.02: Pick Wave Summary
+        </a>
+    </li>
+    <li>
+        <a href="@Url.Action(MVC_PickWaves.PickWaves.ManageWaves.Index(Model.Bucket.CustomerId, null))"
+           title="See other Pick Waves of Customer @Model.Bucket.CustomerId: @Model.Bucket.CustomerName">Other Pick Waves of@Model.Bucket.CustomerName</a>
+    </li>
+    <li class="divider"></li>
+}
+
+@helper AlertType(int j)
+{
+    var activity = Model.Bucket.Activities2.SingleOrDefault(p => p.Value.AreaId == Model.AllAreas[j].AreaId);
+    if (activity.Value == null)
+    {
+        @:well
+    }
+    else
+    {
+        if (activity.Key == BucketActivityType.Pulling)
+        {
+            @:alert alert-success
+        }
+        else
+        {
+            @:alert alert-info
+        }
+    }
+}
+
+<div class="container">
+
+    <h2 style="margin-top:0">
+        @ViewBag.Title
+        <small>
+            <a href="@Url.Action(MVC_PickWaves.PickWaves.Home.Customer(Model.Bucket.CustomerId))"
+               title="See other pick waves of this customer">@Model.Bucket.CustomerId:@Model.Bucket.CustomerName</a>
+        </small>
+    </h2>
+
+    <div role="tabpanel" style="margin-bottom:0.5em">
+        <!-- Nav tabs -->
+        <ul class="nav nav-tabs bg-info" role="tablist">
+            <li>
+                <a href="@Url.Action(MVC_PickWaves.PickWaves.ManageWaves.WavePickslips(Model.Bucket.BucketId))" role="tab">
+                    Pickslips
+                </a>
+
+            </li>
+            <li>
+                <a href="@Url.Action(MVC_PickWaves.PickWaves.ManageWaves.WaveBoxes(Model.Bucket.BucketId))" role="tab">
+                    Boxes
+                </a>
+            </li>
+            <li class="active">
+                <a role="tab">
+                    SKUs
+                </a>
+            </li>
+            @Html.Partial(MVC_PickWaves.PickWaves.ManageWaves.Views._waveFreezeMenuPartial, Model.Bucket)
+        </ul>
+    </div>
+    @Html.Partial(MVC_PickWaves.PickWaves.SharedViews.Views._bucketModelPartial, Model.Bucket, new ViewDataDictionary
+                                   {
+                                       {"IsAuthorized", Model.UserIsManager}
+                                   })
+    <!-- Tab panes -->
+    <div class="tab-content">
+        <div role="tabpanel" class="tab-pane active">
+            <blockquote>
+                @string.Format("SKUs List of wave {0}", Model.Bucket.BucketId)
+            </blockquote>
+
+
+            <ul class="list-group">
+                <li class="list-group-item list-group-item-success">
+                    <div class="row">
+                        <div class="col-md-4">
+
+                            <h4>
+                                SKU
+                                <small>
+                                    <span class="label label-info">@Html.DisplayFor(m => m.TotalWeight) Weight</span>
+                                    <span class="label label-success"> @Html.DisplayFor(m => m.TotalVolume) Volume</span>
+                                    <abbr title="Virtual Warehouse">VWH</abbr>
+                                </small>
+                            </h4>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="row">
+                                @for (var i = 0; i < Model.AllAreas.Count; i++)
+                                {
+                                    <div class="col-lg-3 col-md-4 col-sm-4 col-xs-6">
+                                        <div class="@AlertType(i)">
+
+                                            <small style="white-space:nowrap">
+
+                                                <span class="pull-right">Pieces</span>
+                                                @Model.AllAreas[i].BuildingId-@Model.AllAreas[i].ShortName
+                                            </small>
+                                            @if (!string.IsNullOrEmpty(Model.AllAreas[i].ReplenishAreaId))
+                                            {
+                                                <small title="Replenish from @Model.AllAreas[i].ReplenishAreaId">
+                                                    &larr;@Model.AllAreas[i].ReplenishAreaId
+                                                </small>
+                                            }
+                                            <div class="label label-primary">
+                                                Pieces @@ location
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </li>
+
+                @for (var i = 0; i < Model.BucketSkuList.Count; ++i)
+                {
+                    <li class="list-group-item">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <h4>
+                                    <small>@(i + 1)</small>
+                                    @Html.DisplayFor(m => m.BucketSkuList[i].DisplaySku)
+                                    <small>
+                                        <span class="label label-info">@Html.DisplayFor(m => m.BucketSkuList[i].Weight)</span>
+                                        <span class="label label-success">@Html.DisplayFor(m => m.BucketSkuList[i].Volume)</span>
+                                        @Html.DisplayFor(m => m.BucketSkuList[i].VwhId)
+                                    </small>
+                                    <span class="badge">@Html.DisplayFor(m => m.BucketSkuList[i].PiecesBoxesCreatedTotal) Pieces</span>
+                                </h4>
+                                @if (Model.BucketSkuList[i].PiecesBoxesCreatedPulling > 0 || true) { 
+                                <div class='alert alert-success'
+                                     style="display:inline-block; width:48%">
+                                    Pulling
+
+                                    <small style="white-space:nowrap">
+                                        @Html.DisplayFor(m => m.BucketSkuList[i].PiecesCompletePulling)
+                                        of @Html.DisplayFor(m => m.BucketSkuList[i].PiecesBoxesCreatedPulling) Pieces
+                                    </small>
+                                    <span style="white-space:nowrap">@Html.DisplayFor(m => m.BucketSkuList[i].BoxesRemainingPulling) boxes remaining</span>
+                                </div>
+                                }
+                                @if (Model.BucketSkuList[i].PiecesBoxesCreatedPitching > 0)
+                                {
+                                <div class='alert alert-info'
+                                     style="display:inline-block; width:48%">
+                                    Pitching
+
+                                    <small style="white-space:nowrap">
+                                        @Html.DisplayFor(m => m.BucketSkuList[i].PiecesCompletePitching)
+                                        of @Html.DisplayFor(m => m.BucketSkuList[i].PiecesBoxesCreatedPitching) Pieces
+                                    </small>
+                                    <span style="white-space:nowrap">@Html.DisplayFor(m => m.BucketSkuList[i].BoxesRemainingPitching) boxes remaining</span>
+                                </div>
+                                }
+                            </div>
+
+                            <div class="col-md-8">
+
+                                @{
+                    var hasInventory = false;
+                                }
+                                <div class="row">
+                                    @for (var j = 0; j < Model.AllAreas.Count; ++j)
+                                    {
+                                        <div class="col-lg-3 col-md-4 col-sm-4 col-xs-6">
+                                            @if (Model.BucketSkuList[i].InventoryByArea != null && Model.BucketSkuList[i].InventoryByArea[j].InventoryPieces != null)
+                                            {
+                                                hasInventory = true;
+                                                <div class="@AlertType(j)">
+                                                    <small>
+                                                        <span class="pull-right" title="Total pieces at @Model.AllAreas[j].BuildingId-@Model.AllAreas[j].ShortName">
+                                                            @Html.DisplayFor(m => m.BucketSkuList[i].InventoryByArea[j].InventoryPieces)
+                                                        </span>
+                                                        @Model.AllAreas[j].BuildingId-@Model.AllAreas[j].ShortName
+                                                    </small>
+                                                    @if (!string.IsNullOrWhiteSpace(Model.BucketSkuList[i].InventoryByArea[j].BestLocationId))
+                                                    {
+                                                        <div class="label label-primary" title="Best Location with maximum number of pieces">
+                                                            @Html.DisplayFor(m => m.BucketSkuList[i].InventoryByArea[j].PiecesAtBestLocation)
+                                                            @Html.DisplayFor(m => m.BucketSkuList[i].InventoryByArea[j].BestLocationId)
+                                                        </div>
+                                                    }
+                                                </div>
+
+                                            }
+
+                                        </div>
+
+                                    }
+                                    @if (!hasInventory)
+                                    {
+                                        <div class="col-md-12">
+                                            <div class="alert alert-danger text-center">
+                                                No Inventory
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+</div>
+@section script {
+    <script src="@Links_PickWaves.Areas.PickWaves.SharedViews.BucketModel_js"></script>
+}
+
+
+
+

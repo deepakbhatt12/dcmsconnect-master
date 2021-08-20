@@ -1,0 +1,372 @@
+﻿<!--This document is HTML5 Validated by "W3C Markup Validation Service" at http://validator.w3.org/ on 15 Dec 2014 by jnegi-->
+@model DcmsMobile.PickWaves.Areas.PickWaves.Config.ConstraintViewModel
+@{
+    ViewBag.Title = "Packing Constraints";
+    Layout = @MVC_PickWaves.PickWaves.SharedViews.Views._layoutPickWaves;
+}
+
+@section applinks{
+    <li>@Html.ActionLink("SKU Case", MVC_PickWaves.PickWaves.Config.SkuCase())</li>
+    <li>@Html.ActionLink("Customer Sku Case", MVC_PickWaves.PickWaves.Config.CustSkuCase())</li>
+    <li>@Html.ActionLink("Style Sku Case", MVC_PickWaves.PickWaves.Config.StyleSkuCase())</li>
+    <li class="divider">
+    </li>
+}
+
+
+<div class="container">
+    <h2 style="margin-top:0;">
+        @ViewBag.Title
+    </h2>
+
+    <p>
+        Customers can impose constraints on the cartons they are willing to accept. DCMS supports this scenario by allowing you to define the customer constraints
+        on a per customer basis.
+    </p>
+
+    <div role="tabpanel">
+        <!-- Nav tabs -->
+        <ul class="nav nav-tabs bg-info" role="tablist">
+            <li role="presentation" class="@(Model.ActiveTab == 0 ? "active" : null)"><a href="#tab1" role="tab" data-toggle="tab">By Constraint</a></li>
+            <li role="presentation" class="@(Model.ActiveTab == 1 ? "active" : null)"><a href="#tab2" role="tab" data-toggle="tab">By Customer</a></li>
+        </ul>
+        <!-- Tab panes -->
+        <div class="tab-content">
+            <div role="tabpanel" class="tab-pane @(Model.ActiveTab == 0 ? "active" : "")" id="tab1">
+                <blockquote class="text-info">Default Customer constraints</blockquote>
+
+                <ul class="list-group">
+                    @{
+                        var query = Model.CustomerGroupedList.Where(item => item.Value.MaxBoxWeight.HasValue).ToList();
+                    }
+                    <li class="list-group-item list-group-item-success">
+                        <h4 class="list-group-item-heading">
+                            Maximum Weight of a Packed Box
+                            <em>System Default: @Html.DisplayFor(m => m.DefaultConstraints.MaxBoxWeight)</em>
+                        </h4>
+                        <p class="list-group-item-text">@query.Count customers override this limit</p>
+                    </li>
+
+                    @foreach (var item in query)
+                    {
+                        <li class="list-group-item" style="padding-left:2em;">
+                            <div class="pull-right">
+                                <span class="h3">
+                                    <span class="label label-default">@item.Value.MaxBoxWeight lbs</span>
+                                </span>
+                                @if (Model.UserIsManager)
+                                {
+                                    <button class="btn btn-xs btn-default" data-toggle="modal" data-target="#tabModal" data-show-customer="@item.Key.CustomerId"
+                                            title="Edit customer constraints"
+                                            data-action-url="@Url.Action(MVC_PickWaves.PickWaves.Config.CustomerConstraintEditor(item.Key.CustomerId,0))">
+                                        <span class="glyphicon glyphicon-edit"></span>
+                                        Edit
+                                    </button>
+                                }
+                            </div>
+                            <h4 class="list-group-item-heading">
+                                <a href="@Url.Action(MVC_PickWaves.PickWaves.Home.Search(item.Key.CustomerId))">
+                                    @item.Key.CustomerId
+                                    <small> @item.Key.CustomerName</small>
+                                </a>
+                            </h4>
+
+                        </li>
+                    }
+                    @{
+                        var query1 = Model.CustomerGroupedList.Where(item => item.Value.MaxSkuWithinBox.HasValue).ToList();
+                    }
+                    <li class="list-group-item list-group-item-success">
+                        <h4 class="list-group-item-heading">
+                            Maximum SKUs With in Box
+                            <small>System Default: @Html.DisplayFor(m => m.DefaultConstraints.MaxSkuWithinBox)</small>
+                        </h4>
+                        <p class="list-group-item-text">@query1.Count customers override this limit</p>
+                    </li>
+                    @foreach (var item in query1)
+                    {
+                        <li class="list-group-item" style="padding-left:2em;">
+                            <div class="pull-right">
+                                <span class="h3">
+                                    <span class="label label-default">@item.Value.MaxSkuWithinBox lbs</span>
+                                </span>
+                                @if (Model.UserIsManager)
+                                {
+
+                                    <button class="btn btn-xs btn-default" data-toggle="modal" data-target="#tabModal" title="Edit customer constraints" data-show-customer="@item.Key.CustomerId"
+                                            data-action-url="@Url.Action(MVC_PickWaves.PickWaves.Config.CustomerConstraintEditor(item.Key.CustomerId,0))">
+                                        <span class="glyphicon glyphicon-edit"></span>
+                                        Edit
+                                    </button>
+                                }
+                            </div>
+                            <h4 class="list-group-item-heading">
+                                <a href="@Url.Action(MVC_PickWaves.PickWaves.Home.Search(item.Key.CustomerId))">
+                                    @item.Key.CustomerId
+                                    <small> @item.Key.CustomerName</small></a>
+</h4>
+                        </li>
+                    }
+
+                    @{
+                        var query2 = Model.CustomerGroupedList.Where(item => item.Value.IsSingleStyleColor).ToList();
+                    }
+                    <li class="list-group-item list-group-item-success">
+                        <h4 class="list-group-item-heading">
+                            Single Style Color
+                            <small>System Default:@string.Format(Model.DefaultConstraints.IsSingleStyleColor ? "Set" : "Not Set")</small>
+                        </h4>
+                        <p class="list-group-item-text">@query2.Count customers override this limit</p>
+                    </li>
+                    @foreach (var item in query2)
+                    {
+                        <li class="list-group-item" style="padding-left:2em;">
+                            <div class="pull-right">
+
+                                @if (Model.UserIsManager)
+                                {
+                                    <button class="btn btn-xs btn-default" data-toggle="modal" data-target="#tabModal" title="Edit customer constraints" data-show-customer="@item.Key.CustomerId"
+                                            data-action-url="@Url.Action(MVC_PickWaves.PickWaves.Config.CustomerConstraintEditor(item.Key.CustomerId,0))">
+                                        <span class="glyphicon glyphicon-edit"></span>
+                                        Edit
+                                    </button>
+                                }
+                            </div>
+                            <h4 class="list-group-item-heading">
+                                <a href="@Url.Action(MVC_PickWaves.PickWaves.Home.Search(item.Key.CustomerId))">
+                                    @item.Key.CustomerId
+                                    <small> @item.Key.CustomerName</small></a>
+</h4>
+                        </li>
+
+                    }
+                    @{
+                        var query3 = Model.CustomerGroupedList.Where(item => item.Value.RequiredMinSkuPieces.HasValue).ToList();
+                    }
+                    <li class="list-group-item list-group-item-success">
+                        <h4 class="list-group-item-heading">
+
+                            Minimum Pieces/SKUs With in Box
+                            <small>System Default: @Html.DisplayFor(m => m.DefaultConstraints.RequiredMinSkuPieces)</small>
+                        </h4>
+                        <p class="list-group-item-text">@query3.Count customers override this limit</p>
+                    </li>
+                    @foreach (var item in query3)
+                    {
+                        <li class="list-group-item" style="padding-left:2em;">
+                            <div class="pull-right">
+                                <span class="h3">
+                                    <span class="label label-default">@item.Value.RequiredMinSkuPieces</span>
+                                </span>
+                                @if (Model.UserIsManager)
+                                {
+
+                                    <button class="btn btn-xs btn-default" data-toggle="modal" data-target="#tabModal" title="Edit customer constraints" data-show-customer="@item.Key.CustomerId"
+                                            data-action-url="@Url.Action(MVC_PickWaves.PickWaves.Config.CustomerConstraintEditor(item.Key.CustomerId,0))">
+                                        <span class="glyphicon glyphicon-edit"></span>
+                                        Edit
+                                    </button>
+                                }
+                            </div>
+                            <h4 class="list-group-item-heading">
+                                <a href="@Url.Action(MVC_PickWaves.PickWaves.Home.Search(item.Key.CustomerId))">
+                                    @item.Key.CustomerId
+                                    <small>@item.Key.CustomerName</small></a>
+</h4>
+                        </li>
+
+                    }
+                    @{
+                        var query4 = Model.CustomerGroupedList.Where(item => item.Value.RequiredMaxSkuPieces.HasValue).ToList();
+                    }
+                    <li class="list-group-item list-group-item-success">
+                        <h4 class="list-group-item-heading">
+                            Maximum Pieces/SKUs With in Box
+                            <small>System Default: @Html.DisplayFor(m => m.DefaultConstraints.RequiredMinSkuPieces)</small>
+                        </h4>
+                        <p class="list-group-item-text">@query4.Count customers override this limit</p>
+                    </li>
+                    @foreach (var item in query4)
+                    {
+                        <li class="list-group-item" style="padding-left:2em;">
+                            <div class="pull-right">
+                                <span class="h3">
+                                    <span class="label label-default">@item.Value.RequiredMaxSkuPieces</span>
+                                </span>
+                                @if (Model.UserIsManager)
+                                {
+
+                                    <button class="btn btn-xs btn-default" data-toggle="modal" data-target="#tabModal" title="Edit customer constraints" data-show-customer="@item.Key.CustomerId"
+                                            data-action-url="@Url.Action(MVC_PickWaves.PickWaves.Config.CustomerConstraintEditor(item.Key.CustomerId,0))">
+                                        <span class="glyphicon glyphicon-edit"></span>
+                                        Edit
+                                    </button>
+                                }
+                            </div>
+                            <h4 class="list-group-item-heading">
+                                <a href="@Url.Action(MVC_PickWaves.PickWaves.Home.Search(item.Key.CustomerId))">
+                                    @item.Key.CustomerId
+                                    <small>@item.Key.CustomerName</small></a>
+</h4>
+                        </li>
+
+                    }
+                </ul>
+
+            </div>
+            <div role="tabpanel" class="tab-pane @(Model.ActiveTab == 1 ? "active" : "")" id="tab2">
+                <blockquote class="text-info">
+                    Constraints overridden by Customers
+                    @if (Model.UserIsManager)
+                    {
+                        <button class="btn btn-default" id="btnAddNewCustConstraint" data-toggle="modal"
+                                data-target="#tabModal" data-action-url="@Url.Action(MVC_PickWaves.PickWaves.Config.CustomerConstraintEditor(null,1))"
+                                title="Add Customer Constraint">
+                            <span class="glyphicon glyphicon-plus"></span> Add Customer..
+                        </button>
+                    }
+                </blockquote>
+
+                <ul class="list-group">
+                    @for (var i = 0; i < Model.CustomerGroupedList.Count; ++i)
+                    {
+                        <li class="list-group-item list-group-item-success">
+                            <h4 class="list-group-item-heading">
+                                @if (Model.UserIsManager)
+                                {
+                                    <button class="btn btn-default btn-xs pull-right" data-toggle="modal" data-target="#tabModal"
+                                            data-show-customer="@Model.CustomerGroupedList.Keys[i].CustomerId" title="Edit Customer Constraint"
+                                            data-action-url="@Url.Action(MVC_PickWaves.PickWaves.Config.CustomerConstraintEditor(Model.CustomerGroupedList.Keys[i].CustomerId, 1))">
+                                        <span class="glyphicon glyphicon-edit"></span>
+                                        Edit
+                                    </button>
+
+                                }
+                                <small>@(i + 1) </small>
+                                <a href="@Url.Action(MVC_PickWaves.PickWaves.Home.Search(Model.CustomerGroupedList.Keys[i].CustomerId))">
+                                    @Model.CustomerGroupedList.Keys[i].CustomerId
+                                    <small>@Model.CustomerGroupedList.Keys[i].CustomerName</small></a>
+</h4>
+                        </li>
+                        <li class="list-group-item" style="padding-left:2em;">
+                            <ul class="list-inline">
+                                <li style="width:12em;">
+                                    Single Style Color:
+                                    @if (Model.CustomerGroupedList.Values[i].IsSingleStyleColor)
+                                    {
+                                        <span class="glyphicon glyphicon-ok text-success"></span>
+                                    }
+                                    else
+                                    {
+                                        <span class="glyphicon glyphicon-remove text-danger"></span>
+                                    }
+                                </li>
+                                <li style="width:14em;">
+                                    Max. Weight:
+                                    <span class="label label-success">@Html.DisplayFor(m => m.CustomerGroupedList.Values[i].MaxBoxWeight)</span>
+                                </li>
+                                <li style="width:14em;">
+                                    Max. SKUs:
+                                    <span class="label label-info"> @Html.DisplayFor(m => m.CustomerGroupedList.Values[i].MaxSkuWithinBox)</span>
+                                </li>
+                                <li style="width:14em;">
+                                    Max. Pieces/SKU:
+                                    <span class="label label-warning"> @Html.DisplayFor(m => m.CustomerGroupedList.Values[i].RequiredMaxSkuPieces)</span>
+                                </li>
+                                <li style="width:14em;">
+                                    Min. Pieces/SKU:
+                                    <span class="label label-default"> @Html.DisplayFor(m => m.CustomerGroupedList.Values[i].RequiredMinSkuPieces)</span>
+                                </li>
+                            </ul>
+                        </li>
+                    }
+                </ul>
+
+
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
+<!--Modal called from actions of each tabs-->
+<div class="modal fade" id="tabModal" tabindex="-1" role="dialog"  aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                
+            </div>
+            <div class="modal-body">
+                <!--Form inserted here with Ajax-->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary">Save</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@section script{
+    <link href="@Links_PickWaves.Areas.PickWaves.SharedViews.typeahead_css" rel="stylesheet" />
+
+    <script src="@Links_PickWaves.Areas.PickWaves.Config.AjaxModal_js" type="text/javascript"></script>
+
+    @*<script type="text/javascript">
+            var _customerAutocompleteUrl = '@Url.Action(MVC_PickWaves.PickWaves.Config.CustomerAutocomplete("~"))';
+
+            $(document).ready(function () {
+                //Determining which tab was active during remove or editing.
+                var tabActive = $('ul.nav-tabs').attr('data-active-tab');
+                $('ul.nav-tabs li:eq(' + tabActive + ') a').tab('show')
+
+
+
+                $('#tabModal').on('show.bs.modal', function (e) {
+
+                    var btnAction = $(e.relatedTarget);
+                    //action to be performed at URL
+                    var url = $(btnAction).data('action-url');
+
+                    //Title of the modal that will open
+                    var title = $(btnAction).attr('title');
+
+                    //Active Tab keeps remains open after action performed
+                    var activeTab = $(btnAction).closest('div.tab-pane').index();
+
+
+                    //Ajax call form inserting the modal form and its content
+                    $.ajax({
+                        url: url,
+                        type: 'get',
+                        cache: false
+                    }).done(function (data, textStatus, jqXHR) {
+                        //will render the form first
+                        $('.modal-body').html(data);
+                        //will insert  title in the form
+                        $('.modal-title').text(title);
+
+                        //Will put the values in the edit packing rule form at third tab.
+                        if ($(btnAction).is('[data-show-customer]')) {
+                            $('#tbCustomer,#hfCustomer', '#frmAddCustomerConstraint').val($(btnAction).data('show-customer'));
+                        }
+                        //keep record of the active tab.To open it again after action performed(Edit/Add)
+                        $('#hfActiveTabIndex').val(activeTab);
+
+                    }).fail(function (jqXHR, textStatus, errorThrown) {
+                        alert(jqXHR.responseText);
+                    });
+                }).on('click', 'button:not([data-dismiss])', function (e) {
+                    //finding the form to be post
+                    var $form = $(e.delegateTarget).find('form', '.modal-body');
+                    $form.submit();
+                });
+
+            });
+        </script>*@
+
+}
+
